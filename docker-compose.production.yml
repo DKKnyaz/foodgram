@@ -1,0 +1,46 @@
+version: '3.3'
+
+volumes:
+  staticfiles:
+  mediafiles:
+  pg_data:
+
+services:
+  db:
+    image: postgres:15-alpine
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: dkknyaz/foodgram_backend:latest
+    volumes:
+      - staticfiles:/app/staticfiles/
+      - mediafiles:/app/media/
+      - ./data/:/data/
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: dkknyaz/foodgram_frontend:latest
+    command: cp -r /app/build/. /staticfiles/
+    volumes:
+      - staticfiles:/staticfiles/
+
+  nginx:
+    image: dkknyaz/foodgram_nginx:latest
+    ports:
+      - "8000:80"
+    volumes:
+      - staticfiles:/staticfiles/
+      - mediafiles:/media/
+    depends_on:
+      - frontend
+      - backend

@@ -1,0 +1,38 @@
+[tool.ruff]
+# Длина строки
+line-length = 79
+# Папки-исключения
+exclude = ["migrations", "venv", "env", "manage.py", "settings.py"]
+
+[tool.ruff.lint]
+# Включаем правила: 
+# E, F (Flake8), I (Isort), D (Docstrings), Q (Quotes)
+select = ["E", "F", "I", "D", "Q"]
+# Игнорируем то, что не критично
+ignore = [
+    "D104", # Отсутствие докстринга в пакете (__init__.py)
+    "D105", # Missing docstring in magic method (УБИРАЕТ ОШИБКУ ДЛЯ __str__)
+    "D106", # Отсутствие докстринга во вложенном классе (например, Meta)
+    "D203", # 1 blank line before class
+    "D213", # Multi-line docstring summary should start at the second line
+]
+
+[tool.ruff.lint.pydocstyle]
+# Стиль докстрингов (Google или PEP257)
+convention = "google"
+
+[tool.ruff.lint.flake8-quotes]
+# Твои любимые одинарные кавычки
+inline-quotes = "single"
+multiline-quotes = "double"
+docstring-quotes = "double"
+
+[tool.ruff.lint.isort]
+# Настройки импортов для Django
+known-first-party = ["users", "recipes", "core"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.per-file-ignores]
+# Отключаем требование докстрингов в классах (D101) только для файлов apps.py
+"**/apps.py" = ["D100", "D101"]
+"**/admin.py" = ["D100"]

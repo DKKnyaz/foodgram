@@ -140,3 +140,7 @@ dmypy.json
 
 static/
 media/
+
+# Медиа и статика (по твоим настройкам в settings.py)
+collected_static/
+backend_media/
