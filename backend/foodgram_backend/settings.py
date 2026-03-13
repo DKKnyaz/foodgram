@@ -15,6 +15,12 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = (
     os.getenv('ALLOWED_HOSTS', 'localhost, 127.0.0.1').split(',')
 )
+env_csrf = os.getenv('CSRF_TRUSTED_ORIGINS')
+if env_csrf:
+    CSRF_TRUSTED_ORIGINS = env_csrf.split(',')
+
+else:
+    CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1', 'http://localhost']
 
 # Application definition
 
