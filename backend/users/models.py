@@ -11,7 +11,7 @@ from .constants import INVALID_USERNAMES, MAX_LENGTH_EMAIL, MAX_LENGTH_NAME
 def validate_username_reserved(username):
     """Проверить имя пользователя на совпадение с резервированными.
 
-    Сравнивает имя пользователя в нижнем регистре со списком 
+    Сравнивает имя пользователя в нижнем регистре со списком
     запрещенных имен INVALID_USERNAMES.
     """
     if username.lower() in INVALID_USERNAMES:

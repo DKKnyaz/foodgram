@@ -26,7 +26,7 @@ class SubscriptionSerializer(UserSerializer):
     def get_recipes(self, obj):
         """Получает рецепты автора.
 
-        Проверяет наличие параметра 'recipes_limit' в запросе и 
+        Проверяет наличие параметра 'recipes_limit' в запросе и
         обрезает QuerySet до указанного значения.
         """
         request = self.context.get('request')
