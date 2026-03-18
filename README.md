@@ -1,6 +1,6 @@
-# KITTYGRAM
+#FOODGRAM
 
-[![Foodgram Workflow](https://github.com/DKKnyaz/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/DKKnyaz/foodgram/actions/workflows/main.yml)
+[![Main Foodgram Workflow](https://github.com/DKKnyaz/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/DKKnyaz/foodgram/actions/workflows/main.yml)
 
 ------------------------------
 Foodgram — Продуктовый помощник 🍲
