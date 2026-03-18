@@ -13,11 +13,13 @@ from .models import (
 
 class BaseAdmin(admin.ModelAdmin):
     """Базовая настройка для отображения пустых значений."""
+
     empty_value_display = '-пусто-'
 
 
 class RecipeIngredientInline(admin.TabularInline):
     """Вспомогательный класс для отображения ингредиентов внутри рецепта."""
+
     model = RecipeIngredient
     min_num = INGREDIENT_MIN_AMOUNT
     extra = 1
@@ -27,6 +29,7 @@ class RecipeIngredientInline(admin.TabularInline):
 @admin.register(Tag)
 class TagAdmin(BaseAdmin):
     """Управление тегами в админ-панели."""
+
     list_display = ('id', 'name', 'slug')
     search_fields = ('name', 'slug')
     list_editable = ('name', 'slug')
@@ -35,6 +38,7 @@ class TagAdmin(BaseAdmin):
 @admin.register(Ingredient)
 class IngredientAdmin(BaseAdmin):
     """Управление ингредиентами и их единицами измерения."""
+
     list_display = ('name', 'measurement_unit')
     search_fields = ('name',)
     list_filter = ('measurement_unit',)
@@ -43,6 +47,7 @@ class IngredientAdmin(BaseAdmin):
 @admin.register(Recipe)
 class RecipeAdmin(BaseAdmin):
     """Управление рецептами, включая фильтрацию и просмотр ингредиентов."""
+
     list_display = ('id', 'name', 'author', 'get_favorites_count')
     list_filter = ('author', 'tags')
     search_fields = ('name', 'author__username', 'author__email')
@@ -55,15 +60,21 @@ class RecipeAdmin(BaseAdmin):
         return obj.favorites.count()
 
 
-@admin.register(Favorite)
-class FavoriteAdmin(BaseAdmin):
-    """Управление избранными рецептами пользователей."""
+class UserRecipeBaseAdmin(BaseAdmin):
+    """Базовый класс для моделей, связывающих пользователя и рецепт."""
+
     list_display = ('id', 'user', 'recipe')
     search_fields = ('user__username', 'recipe__name')
+
+    class Meta:
+        abstract = True
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(UserRecipeBaseAdmin):
+    """Управление избранными рецептами пользователей."""
 
 
 @admin.register(ShoppingCart)
-class ShoppingCartAdmin(BaseAdmin):
+class ShoppingCartAdmin(UserRecipeBaseAdmin):
     """Управление списком покупок пользователей."""
-    list_display = ('id', 'user', 'recipe')
-    search_fields = ('user__username', 'recipe__name')

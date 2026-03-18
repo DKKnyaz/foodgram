@@ -6,20 +6,30 @@ exclude = ["migrations", "venv", "env", "manage.py", "settings.py"]
 
 [tool.ruff.lint]
 # Включаем правила: 
-# E, F (Flake8), I (Isort), D (Docstrings), Q (Quotes)
-select = ["E", "F", "I", "D", "Q"]
+select = [
+    "E",    # pycodestyle: Ошибки стиля (отступы, пробелы, длина строк)
+    "F",    # Pyflakes: Логические ошибки (импорты, неопределенные переменные)
+    "B",    # flake8-bugbear: Поиск вероятных багов и "плохого" дизайна кода
+    "I",    # isort: Автоматическая сортировка импортов по алфавиту и группам
+    "D",    # pydocstyle: Проверка наличия и оформления Docstrings (документации)
+    "UP",   # pyupgrade: Обновление синтаксиса до актуальных версий Python
+    "C4",   # flake8-comprehensions: Оптимизация списков, словарей и множеств
+    "Q",    # flake8-quotes: Контроль за единообразием кавычек (одинарные/двойные)
+    "R",    # Refactor (RET, RSE, TRY): Советы по улучшению структуры кода
+]
 # Игнорируем то, что не критично
 ignore = [
     "D104", # Отсутствие докстринга в пакете (__init__.py)
     "D105", # Missing docstring in magic method (УБИРАЕТ ОШИБКУ ДЛЯ __str__)
     "D106", # Отсутствие докстринга во вложенном классе (например, Meta)
+    "D202", # Игнорируем запрет на пустую строку после докстринга
     "D203", # 1 blank line before class
     "D213", # Multi-line docstring summary should start at the second line
 ]
 
 [tool.ruff.lint.pydocstyle]
 # Стиль докстрингов (Google или PEP257)
-convention = "google"
+convention = "pep257"
 
 [tool.ruff.lint.flake8-quotes]
 # Твои любимые одинарные кавычки

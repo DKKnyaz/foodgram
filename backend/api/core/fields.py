@@ -1,5 +1,11 @@
-"""Общие сериализаторы и кастомные поля для всех приложений проекта."""
+"""
+Модуль кастомных полей для Django REST Framework.
+
+Содержит поля для обработки специфических форматов данных (например, Base64),
+которые не поддерживаются стандартными средствами DRF.
+"""
 import base64
+import binascii
 import hashlib
 
 from django.core.files.base import ContentFile
@@ -18,17 +24,19 @@ class Base64ImageField(serializers.ImageField):
         """
         if isinstance(data, str) and data.startswith('data:image'):
             try:
-                format, imgstr = data.split(';base64,')
-                ext = format.split('/')[-1]
-
-                file_name = f'{hashlib.md5(imgstr.encode()).hexdigest()}.{ext}'
-
-                data = ContentFile(
-                    base64.b64decode(imgstr),
-                    name=file_name
-                )
-            except (ValueError, TypeError):
+                file_format, imgstr = data.split(';base64,')
+                ext = file_format.split('/')[-1]
+            except (ValueError, TypeError) as err:
                 raise serializers.ValidationError(
                     'Некорректный формат изображения.'
-                )
+                ) from err
+            try:
+                decoded_file = base64.b64decode(imgstr)
+            except (binascii.Error, TypeError) as err:
+                raise serializers.ValidationError(
+                    'Не удалось декодировать base64.'
+                ) from err
+            file_name = f'{hashlib.md5(imgstr.encode()).hexdigest()}.{ext}'
+            data = ContentFile(decoded_file, name=file_name)
+
         return super().to_internal_value(data)

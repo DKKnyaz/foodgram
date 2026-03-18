@@ -4,26 +4,28 @@
 управления аватарами и создания подписок на авторов.
 """
 from django.contrib.auth import get_user_model
-from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet as DjoserUserViewSet
-from rest_framework import generics, permissions, status, views
+from rest_framework import generics, permissions, serializers, status, views
 from rest_framework.response import Response
 
-from .models import Subscription
 from .selectors import (
     get_annotated_authors_for_user,
     get_subscriptions_for_user,
 )
-from .serializers import AvatarSerializer
-from .subscription_serializers import SubscriptionSerializer
+from .serializers import (
+    AvatarSerializer,
+    SubscribeActionSerializer,
+    SubscriptionSerializer,
+)
 
 User = get_user_model()
 
 
 class UserViewSet(DjoserUserViewSet):
     """Вьюсет для работы с пользователями и профилем текущего пользователя."""
-    http_method_names = ['get', 'post']
+
+    http_method_names = ('get', 'post')
 
     def get_permissions(self):
         """Возвращает список разрешений в зависимости от действия."""
@@ -48,8 +50,8 @@ class UserSubscriptionsView(UserActionMixin, generics.ListAPIView):
     serializer_class = SubscriptionSerializer
 
     def get_queryset(self):
-        """Получение списка авторов."""
-        return get_subscriptions_for_user(self.request.user)
+        """Получение списка авторов с их рецептами."""
+        return get_subscriptions_for_user(self.request.user, with_recipes=True)
 
 
 class UserAvatarView(UserActionMixin, views.APIView):
@@ -60,7 +62,7 @@ class UserAvatarView(UserActionMixin, views.APIView):
         serializer = AvatarSerializer(request.user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
 
     def delete(self, request):
         """Удаление аватара."""
@@ -74,39 +76,29 @@ class UserSubscribeView(UserActionMixin, views.APIView):
     def post(self, request, id):
         """Создание подписки."""
         author = get_object_or_404(
-            get_annotated_authors_for_user(request.user),
+            get_annotated_authors_for_user(request.user, with_recipes=False),
             id=id
         )
-        if request.user == author:
-            return Response(
-                {'errors': 'Нельзя подписаться на самого себя'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        try:
-            Subscription.objects.create(user=request.user, author=author)
-        except IntegrityError:
-            return Response(
-                {'errors': 'Вы уже подписаны'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        serializer = SubscriptionSerializer(
-            author, context={'request': request}
+        serializer = SubscribeActionSerializer(
+            data={'user': request.user.id, 'author': author.id},
+            context={'request': request}
         )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
         """Удалить подписку на автора."""
         author = get_object_or_404(User, id=id)
-        subscription = Subscription.objects.filter(
-            user=request.user, author=author
-        ).first()
 
-        if subscription:
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        deleted_count, _ = request.user.subscriptions.filter(
+            author=author
+        ).delete()
 
-        return Response(
-            {'errors': 'Вы не подписаны на этого автора'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        if not deleted_count:
+            raise serializers.ValidationError(
+                {'errors': 'Вы не подписаны на этого автора.'}
+            )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

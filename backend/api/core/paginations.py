@@ -1,7 +1,7 @@
 """Пагинация проекта Foodgram."""
 from rest_framework.pagination import PageNumberPagination
 
-from core.constants import DEFAULT_PAGE_SIZE
+from api.core.constants import DEFAULT_PAGE_SIZE
 
 
 class FoodgramPagination(PageNumberPagination):

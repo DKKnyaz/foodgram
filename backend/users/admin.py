@@ -15,6 +15,7 @@ class BaseAdmin(admin.ModelAdmin):
 
 class SubscriptionInline(admin.TabularInline):
     """Отображение подписок пользователя прямо в его профиле."""
+
     model = Subscription
     fk_name = 'user'
     extra = 1

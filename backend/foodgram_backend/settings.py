@@ -146,17 +146,15 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.SearchFilter',
     ),
-    'DEFAULT_PAGINATION_CLASS':
-        'core.paginations.FoodgramPagination',
+    'DEFAULT_PAGINATION_CLASS':'api.core.paginations.FoodgramPagination'
 }
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        'user': 'users.serializers.UserSerializer',
-        'current_user': 'users.serializers.UserSerializer',
-        'user_create': 'users.serializers.CustomUserCreateSerializer',
+        'user': 'api.users.serializers.UserSerializer',
+        'current_user': 'api.users.serializers.UserSerializer',
     },
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.AllowAny'],

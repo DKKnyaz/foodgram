@@ -1,5 +1,6 @@
 """Константы и настройки валидации для приложения рецептов."""
 COOKING_MIN_TIME = 1
+COOKING_MAX_TIME = 2880
 INGREDIENT_MAX_LENGTH = 128
 INGREDIENT_MIN_AMOUNT = 1
 INGREDIENT_UNIT_MAX_LENGTH = 64

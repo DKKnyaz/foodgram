@@ -4,19 +4,22 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from recipes.views import RedirectShortLinkView
+from api.recipes.views import RedirectShortLinkView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Путь "пустышка" для reverse с фронтом.
+    path('recipes/<int:pk>/', lambda r, pk: None, name='recipe-frontend'),
     path(
         's/<str:short_id>/',
         RedirectShortLinkView.as_view(),
         name='short_link_redirect'
     ),
     path('api/', include([
-        path('', include('users.urls')),
-        path('', include('recipes.urls')),
+        path('', include('api.users.urls')),
+        path('', include('api.recipes.urls')),
     ])),
+    path('', lambda r: None, name='index'),  # Главная для redirect с фронтом.
 ]
 
 if settings.DEBUG:

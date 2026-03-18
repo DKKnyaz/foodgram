@@ -35,18 +35,20 @@ class Command(BaseCommand):
             )
 
             try:
-                file_path = open(file_path, 'r', encoding='utf-8')
-            except FileNotFoundError:
+                file_path = open(file_path, encoding='utf-8')
+            except FileNotFoundError as err:
                 raise CSVFileNotFoundError(
                     f'Ошибка при импорте файла базы данных. '
                     f'Проверьте наличие файла {model_data.file_name} '
-                    f'по адресу: {file_path}')
+                    f'по адресу: {file_path}') from err
 
             with file_path:
                 reader = csv.reader(file_path)
 
                 objects_to_create = [
-                    model_data.model(**dict(zip(model_data.fields, row)))
+                    model_data.model(**dict(
+                        zip(model_data.fields, row, strict=True)
+                    ))
                     for row in reader if row
                 ]
 

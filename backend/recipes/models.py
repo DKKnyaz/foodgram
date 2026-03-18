@@ -1,10 +1,11 @@
 """Модели базы данных для рецептов, тегов и ингредиентов."""
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.http import urlsafe_base64_encode
 
 from .constants import (
+    COOKING_MAX_TIME,
     COOKING_MIN_TIME,
     INGREDIENT_MAX_LENGTH,
     INGREDIENT_MIN_AMOUNT,
@@ -44,7 +45,7 @@ class Ingredient(models.Model):
         verbose_name_plural = 'Ингредиенты'
         constraints = [
             models.UniqueConstraint(
-                fields=['name', 'measurement_unit'],
+                fields=('name', 'measurement_unit'),
                 name='name_measurement_unit',
             )
         ]
@@ -71,6 +72,10 @@ class Recipe(models.Model):
                 COOKING_MIN_TIME,
                 f'Значение не должно быть меньше {COOKING_MIN_TIME}',
             ),
+            MaxValueValidator(
+                COOKING_MAX_TIME,
+                f'Максимум 2 суток({COOKING_MAX_TIME}минут)'
+            )
         ],
     )
     tags = models.ManyToManyField(Tag, verbose_name='Список тегов')
@@ -81,11 +86,6 @@ class Recipe(models.Model):
     )
     created_at = models.DateTimeField('Создано', auto_now_add=True)
 
-    @property
-    def short_id(self):
-        """Возвращает закодированный ID для внешних ссылок."""
-        return urlsafe_base64_encode(str(self.id).encode())
-
     class Meta:
         ordering = ('-created_at', 'name')
         default_related_name = 'recipes'
@@ -94,6 +94,11 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def short_id(self):
+        """Возвращает закодированный ID для внешних ссылок."""
+        return urlsafe_base64_encode(str(self.id).encode())
 
 
 class RecipeIngredient(models.Model):
@@ -123,7 +128,7 @@ class RecipeIngredient(models.Model):
         default_related_name = 'ingredient_list'
         constraints = [
             models.UniqueConstraint(
-                fields=['ingredient', 'recipe'],
+                fields=('ingredient', 'recipe'),
                 name='unique_ingredient_in_recipe'
             )
         ]
@@ -152,7 +157,7 @@ class UserRecipeBaseModel(models.Model):
         abstract = True
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'],
+                fields=('user', 'recipe'),
                 name='unique_%(class)s_relation'
             )
         ]
@@ -167,7 +172,7 @@ class Favorite(UserRecipeBaseModel):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return f'{self.recipe.name!r} в избранном у {self.user.username!r}'
+        return f'{self.recipe.name!r} в избранном у {self.user.username}'
 
 
 class ShoppingCart(UserRecipeBaseModel):
@@ -179,4 +184,4 @@ class ShoppingCart(UserRecipeBaseModel):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return f'Список покупок {self.author.username} для {self.recipe.name}'
+        return f'Список покупок {self.user.username} для {self.recipe.name!r}'
