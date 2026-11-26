@@ -53,7 +53,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     """Представление для рецептов."""
 
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = (IsAuthorOrReadOnly,)
     filterset_class = RecipeFilter
 
     def get_queryset(self):

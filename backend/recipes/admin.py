@@ -66,9 +66,6 @@ class UserRecipeBaseAdmin(BaseAdmin):
     list_display = ('id', 'user', 'recipe')
     search_fields = ('user__username', 'recipe__name')
 
-    class Meta:
-        abstract = True
-
 
 @admin.register(Favorite)
 class FavoriteAdmin(UserRecipeBaseAdmin):

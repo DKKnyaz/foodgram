@@ -25,11 +25,17 @@ class Base64ImageField(serializers.ImageField):
         if isinstance(data, str) and data.startswith('data:image'):
             try:
                 file_format, imgstr = data.split(';base64,')
-                ext = file_format.split('/')[-1]
             except (ValueError, TypeError) as err:
                 raise serializers.ValidationError(
                     'Некорректный формат изображения.'
                 ) from err
+            
+            if '/' not in file_format:
+                raise serializers.ValidationError(
+                    'Не указано расширение изображения.'
+                )
+            ext = file_format.split('/')[-1]
+            
             try:
                 decoded_file = base64.b64decode(imgstr)
             except (binascii.Error, TypeError) as err:
